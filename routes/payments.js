@@ -5,16 +5,26 @@ const Stripe = require('stripe');
 const crypto = require('crypto');
 const db = require('../db/config');
 
-// Initialize payment gateways
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Initialize payment gateways (only if credentials are provided)
+let razorpay = null;
+let stripe = null;
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+}
+
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 // Create Razorpay order
 router.post('/razorpay/create', async (req, res) => {
+    if (!razorpay) {
+        return res.status(503).json({ error: 'Razorpay is not configured' });
+    }
     try {
         const { order_id } = req.body;
 
@@ -61,6 +71,9 @@ router.post('/razorpay/create', async (req, res) => {
 
 // Verify Razorpay payment
 router.post('/razorpay/verify', async (req, res) => {
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(503).json({ error: 'Razorpay is not configured' });
+    }
     try {
         const {
             razorpay_order_id,
@@ -109,6 +122,9 @@ router.post('/razorpay/verify', async (req, res) => {
 
 // Create Stripe payment intent
 router.post('/stripe/create', async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: 'Stripe is not configured' });
+    }
     try {
         const { order_id } = req.body;
 
@@ -153,6 +169,9 @@ router.post('/stripe/create', async (req, res) => {
 
 // Stripe webhook handler
 router.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: 'Stripe is not configured' });
+    }
     const sig = req.headers['stripe-signature'];
 
     let event;

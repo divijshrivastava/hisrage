@@ -375,8 +375,8 @@
                             ${product.features.map(feature => `<li>${feature}</li>`).join('')}
                         </ul>
                         <div class="product-actions">
-                            <button class="btn-add-cart" onclick="addToCart(${product.id})">Add to Cart</button>
-                            <button class="btn-quick-view" onclick="quickView(${product.id})">View</button>
+                            <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
+                            <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
                         </div>
                     </div>
                 `;
@@ -424,6 +424,17 @@
         function updateCartCount() {
             console.log('Cart updated');
         }
+
+        // Use event delegation for dynamically created buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-action="add-to-cart"]')) {
+                const productId = parseInt(e.target.getAttribute('data-product-id'));
+                addToCart(productId);
+            } else if (e.target.matches('[data-action="quick-view"]')) {
+                const productId = parseInt(e.target.getAttribute('data-product-id'));
+                quickView(productId);
+            }
+        });
 
         // Load products on page load
         document.addEventListener('DOMContentLoaded', loadProducts);

@@ -24,6 +24,63 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Shop Now button - scroll to products section
+    const shopNowBtn = document.querySelector('.nav-cta .btn-secondary');
+    if (shopNowBtn) {
+        shopNowBtn.addEventListener('click', () => {
+            const productsSection = document.querySelector('#products');
+            if (productsSection) {
+                productsSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+
+    // Explore Collection button - scroll to products section
+    const exploreBtn = document.querySelector('.hero-cta .btn-primary');
+    if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+            const productsSection = document.querySelector('#products');
+            if (productsSection) {
+                productsSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+
+    // Learn More button - scroll to about section
+    const learnMoreBtn = document.querySelector('.hero-cta .btn-outline');
+    if (learnMoreBtn) {
+        learnMoreBtn.addEventListener('click', () => {
+            const aboutSection = document.querySelector('#about');
+            if (aboutSection) {
+                aboutSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+
+    // Shop buttons inside category cards
+    const shopButtons = document.querySelectorAll('.category-overlay .btn-primary');
+    shopButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card click event
+            const card = button.closest('.category-card');
+            if (card) {
+                const link = card.getAttribute('data-link');
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        });
+    });
 });
 
 // Navbar scroll effect

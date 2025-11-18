@@ -24,7 +24,7 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
             scriptSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: ["'self'", "data:", "https:"],
         },
@@ -84,6 +84,11 @@ app.use('/api/admin', adminRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'HisRage API is running' });
+});
+
+// Favicon handler - return 204 No Content to suppress 404 errors
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
 });
 
 // Serve frontend for all non-API, non-static routes
