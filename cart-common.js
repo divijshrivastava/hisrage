@@ -2,7 +2,9 @@
 
 // Update cart count in navigation
 async function updateCartCount(count) {
+    console.log('updateCartCount called with:', count);
     const cartCountElements = document.querySelectorAll('#cart-count');
+    console.log('Found cart count elements:', cartCountElements.length);
 
     if (count === undefined) {
         // Fetch from API
@@ -11,6 +13,7 @@ async function updateCartCount(count) {
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log('Fetched cart data:', data);
             count = data.item_count || 0;
         } catch (error) {
             console.error('Error fetching cart count:', error);
@@ -18,8 +21,10 @@ async function updateCartCount(count) {
         }
     }
 
+    console.log('Setting cart count to:', count);
     cartCountElements.forEach(el => {
         el.textContent = count;
+        console.log('Updated element:', el);
 
         // Animate the counter
         el.style.transform = 'scale(1.3)';

@@ -400,21 +400,25 @@
                 });
 
                 const data = await response.json();
+                console.log('Add to cart response:', data);
 
                 if (response.ok) {
                     showNotification('Ring added to cart! 🔥', 'success');
                     // Update cart count with the returned value
                     if (data.item_count !== undefined) {
+                        console.log('Updating cart count to:', data.item_count);
                         updateCartCount(data.item_count);
                     } else {
+                        console.log('No item_count in response, fetching cart');
                         updateCartCount();
                     }
                 } else {
+                    console.error('Add to cart failed:', data);
                     showNotification('Failed to add to cart. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                showNotification('Added to cart!', 'success');
+                showNotification('Error adding to cart', 'error');
             }
         }
 
