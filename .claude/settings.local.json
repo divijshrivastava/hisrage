@@ -20,7 +20,14 @@
       "Bash(flyctl certs create:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(flyctl tokens create:*)",
+      "Bash(gh secret set:*)",
+      "Bash(gh run:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
