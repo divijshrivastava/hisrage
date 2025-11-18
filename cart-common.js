@@ -62,11 +62,17 @@ function showNotification(message, type = 'success') {
             <span class="notification-icon">${icon}</span>
             <span class="notification-message">${message}</span>
         </div>
-        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+        <button class="notification-close">×</button>
     `;
 
     // Add to page
     document.body.appendChild(notification);
+
+    // Add close button handler
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.remove();
+    });
 
     // Trigger animation
     setTimeout(() => {
