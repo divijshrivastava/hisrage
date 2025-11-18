@@ -12,6 +12,20 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// Category card navigation
+document.addEventListener('DOMContentLoaded', () => {
+    const categoryCards = document.querySelectorAll('.category-card');
+    categoryCards.forEach(card => {
+        const link = card.getAttribute('data-link');
+        if (link) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                window.location.href = link;
+            });
+        }
+    });
+});
+
 // Navbar scroll effect
 let lastScroll = 0;
 const navbar = document.querySelector('.navbar');
