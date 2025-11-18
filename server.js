@@ -74,7 +74,7 @@ app.use(cookieParser());
 // Session configuration with PostgreSQL store
 app.use(session({
     store: new pgSession({
-        pool: db,
+        pool: db.pool,
         tableName: 'session',
         createTableIfMissing: true
     }),
