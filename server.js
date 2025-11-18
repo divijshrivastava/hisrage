@@ -4,8 +4,10 @@ const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const db = require('./db/config');
 
 // Import routes
 const productRoutes = require('./routes/products');
@@ -69,8 +71,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Session configuration
+// Session configuration with PostgreSQL store
 app.use(session({
+    store: new pgSession({
+        pool: db,
+        tableName: 'session',
+        createTableIfMissing: true
+    }),
     secret: process.env.SESSION_SECRET || 'hisrage-secret-key',
     resave: false,
     saveUninitialized: true, // Create session immediately for cart to work
