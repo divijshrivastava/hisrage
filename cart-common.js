@@ -7,7 +7,9 @@ async function updateCartCount(count) {
     if (count === undefined) {
         // Fetch from API
         try {
-            const response = await fetch('/api/cart');
+            const response = await fetch('/api/cart', {
+                credentials: 'include'
+            });
             const data = await response.json();
             count = data.item_count || 0;
         } catch (error) {

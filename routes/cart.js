@@ -164,7 +164,15 @@ router.post('/add', async (req, res) => {
                 });
             }
 
-            return res.json({ message: 'Item added to cart successfully' });
+            // Explicitly save session
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    return res.status(500).json({ error: 'Failed to save cart' });
+                }
+                return res.json({ message: 'Item added to cart successfully' });
+            });
+            return;
         }
 
         const userId = req.session.userId || null;
