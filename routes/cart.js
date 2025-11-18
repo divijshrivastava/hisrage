@@ -170,7 +170,13 @@ router.post('/add', async (req, res) => {
                     console.error('Session save error:', err);
                     return res.status(500).json({ error: 'Failed to save cart' });
                 }
-                return res.json({ message: 'Item added to cart successfully' });
+
+                // Return updated cart count
+                const itemCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
+                return res.json({
+                    message: 'Item added to cart successfully',
+                    item_count: itemCount
+                });
             });
             return;
         }

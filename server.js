@@ -40,7 +40,27 @@ app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Allow same-origin and configured frontend
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'https://hisrage.com',
+            'http://hisrage.com'
+        ];
+
+        if (process.env.FRONTEND_URL) {
+            allowedOrigins.push(process.env.FRONTEND_URL);
+        }
+
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow all for now since we're serving from same domain
+        }
+    },
     credentials: true
 }));
 

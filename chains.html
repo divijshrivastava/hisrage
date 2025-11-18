@@ -403,7 +403,12 @@
 
                 if (response.ok) {
                     showNotification('Chain added to cart! 🔥', 'success');
-                    updateCartCount();
+                    // Update cart count with the returned value
+                    if (data.item_count !== undefined) {
+                        updateCartCount(data.item_count);
+                    } else {
+                        updateCartCount();
+                    }
                 } else {
                     showNotification('Failed to add to cart. Please try again.', 'error');
                 }
