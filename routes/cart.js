@@ -30,8 +30,9 @@ async function isDbAvailable() {
 
 // Helper function to get or create cart (session-based fallback)
 async function getOrCreateCart(userId, sessionId) {
+    console.log('getOrCreateCart called with userId:', userId, 'sessionId:', sessionId);
     const dbAvailable = await isDbAvailable();
-    
+
     if (!dbAvailable) {
         // Return a mock cart object for session-based storage
         return { id: 'session-cart' };
@@ -41,20 +42,25 @@ async function getOrCreateCart(userId, sessionId) {
 
     if (userId) {
         cart = await db.query('SELECT * FROM carts WHERE user_id = $1', [userId]);
+        console.log('Found cart by userId:', cart.rows.length);
     } else if (sessionId) {
         cart = await db.query('SELECT * FROM carts WHERE session_id = $1', [sessionId]);
+        console.log('Found cart by sessionId:', cart.rows.length, 'sessionId:', sessionId);
     }
 
     if (cart && cart.rows.length > 0) {
+        console.log('Returning existing cart:', cart.rows[0].id);
         return cart.rows[0];
     }
 
     // Create new cart
+    console.log('Creating new cart for sessionId:', sessionId);
     const newCart = await db.query(
         'INSERT INTO carts (user_id, session_id) VALUES ($1, $2) RETURNING *',
         [userId || null, sessionId || null]
     );
 
+    console.log('New cart created:', newCart.rows[0].id);
     return newCart.rows[0];
 }
 
@@ -183,14 +189,17 @@ router.post('/add', async (req, res) => {
 
         const userId = req.session.userId || null;
         const sessionId = req.session.id;
+        console.log('Add to cart - Session ID:', sessionId, 'User ID:', userId);
 
         const cart = await getOrCreateCart(userId, sessionId);
+        console.log('Using cart ID:', cart.id);
 
         // Check if item already exists in cart
         const existingItem = await db.query(
             'SELECT * FROM cart_items WHERE cart_id = $1 AND product_id = $2',
             [cart.id, product_id]
         );
+        console.log('Existing items in cart for product', product_id, ':', existingItem.rows.length);
 
         if (existingItem.rows.length > 0) {
             // Update quantity
