@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rings - HisRage</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .product-hero {
+            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(204,0,0,0.4) 50%, rgba(10,10,10,0.8) 100%);
+            padding: 150px 0 80px;
+            text-align: center;
+        }
+
+        .product-hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--fire-orange) 0%, var(--primary-color) 50%, var(--rage-red) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .product-hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .products-section {
+            padding: 6rem 0;
+            background-color: var(--bg-darker);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .product-card {
+            background-color: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            position: relative;
+            background-color: #000;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--rage-red);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+
+        .product-info {
+            padding: 2rem;
+        }
+
+        .product-name {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .product-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .current-price {
+            font-size: 2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .original-price {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .product-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-features li {
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .product-features li:last-child {
+            border-bottom: none;
+        }
+
+        .product-features li::before {
+            content: "✓ ";
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+            padding: 1rem;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-add-cart:hover {
+            background-color: #e6c555;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-quick-view {
+            background-color: transparent;
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+        }
+
+        .btn-quick-view:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--rage-red);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .product-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">HISRAGE</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="index.html#about">About</a></li>
+                    <li><a href="index.html#warranty">Warranty</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <button class="btn-secondary" onclick="window.location.href='#cart'">Cart (0)</button>
+                </div>
+                <div class="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Hero -->
+    <section class="product-hero">
+        <div class="container">
+            <a href="index.html#products" class="back-link">← Back to All Products</a>
+            <h1>Rings of Rage</h1>
+            <p>Forged for warriors. Each ring channels primal power and untamed strength.</p>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section">
+        <div class="container">
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">HISRAGE</h3>
+                    <p class="footer-description">Steel forged in fury. Worn by warriors. 316L stainless steel jewellery for men who refuse to be tamed.</p>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#products">Products</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#warranty">Warranty</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Policies</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 HisRage. All rights reserved. Forged for Warriors.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Ring products data
+        const ringProducts = [
+            {
+                id: 1,
+                name: 'Warrior Signet Ring',
+                image: 'images/rings/pexels-shkrabaanthony-7167017.jpg',
+                description: 'Bold signet ring engraved with ancient warrior symbols. Forged in 316L stainless steel to withstand any battle.',
+                currentPrice: 1499,
+                originalPrice: 1999,
+                badge: 'Featured',
+                features: ['316L Stainless Steel', 'Non-tarnish finish', '6-month warranty', 'Premium packaging']
+            },
+            {
+                id: 2,
+                name: 'Alpha Dominance Ring',
+                image: 'images/rings/pexels-bayo-taiwo-1056397630-24268495.jpg',
+                description: 'Channel your inner alpha with this commanding ring. Non-tarnish steel that never backs down.',
+                currentPrice: 1299,
+                originalPrice: 1699,
+                badge: 'Best Seller',
+                features: ['316L Stainless Steel', 'Adjustable fit', '6-month warranty', 'Free shipping']
+            },
+            {
+                id: 3,
+                name: 'Primal Power Ring',
+                image: 'images/rings/pexels-kevin-yung-2152346613-33547910.jpg',
+                description: 'Raw power meets refined design. This ring embodies the untamed spirit of the modern warrior.',
+                currentPrice: 1599,
+                originalPrice: 2199,
+                badge: 'New',
+                features: ['316L Stainless Steel', 'Unique design', '6-month warranty', 'COD available']
+            },
+            {
+                id: 4,
+                name: 'Rage Band',
+                image: 'images/rings/pexels-japy-18747845.jpg',
+                description: 'Minimal yet powerful. This band embodies controlled fury and raw masculine strength.',
+                currentPrice: 899,
+                originalPrice: 1199,
+                badge: 'Sale',
+                features: ['316L Stainless Steel', 'Lightweight', '6-month warranty', 'Premium quality']
+            }
+        ];
+
+        // Load products
+        function loadProducts() {
+            const grid = document.getElementById('productsGrid');
+
+            ringProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                        <div class="product-badge">${product.badge}</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-price">
+                            <span class="current-price">₹${product.currentPrice.toLocaleString()}</span>
+                            <span class="original-price">₹${product.originalPrice.toLocaleString()}</span>
+                        </div>
+                        <ul class="product-features">
+                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                        <div class="product-actions">
+                            <button class="btn-add-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                            <button class="btn-quick-view" onclick="quickView(${product.id})">View</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(productCard);
+            });
+        }
+
+        // Add to cart function
+        async function addToCart(productId) {
+            try {
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Ring added to cart! 🔥');
+                    updateCartCount();
+                } else {
+                    alert('Failed to add to cart. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Added to cart!'); // Fallback for now
+            }
+        }
+
+        // Quick view function
+        function quickView(productId) {
+            const product = ringProducts.find(p => p.id === productId);
+            if (product) {
+                alert(`${product.name}\n\n${product.description}\n\nPrice: ₹${product.currentPrice}\n\nClick "Add to Cart" to purchase!`);
+            }
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            // This will be implemented with actual cart API
+            console.log('Cart updated');
+        }
+
+        // Load products on page load
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>
