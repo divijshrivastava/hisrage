@@ -237,7 +237,7 @@
                     <li><a href="index.html#contact">Contact</a></li>
                 </ul>
                 <div class="nav-cta">
-                    <button class="btn-secondary">Cart (0)</button>
+                    <button class="btn-secondary" data-cart-link>Cart (<span id="cart-count">0</span>)</button>
                 </div>
                 <div class="mobile-menu-toggle">
                     <span></span>
@@ -401,14 +401,14 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Bracelet added to cart! 🔥');
+                    showNotification('Bracelet added to cart! 🔥', 'success');
                     updateCartCount();
                 } else {
-                    alert('Failed to add to cart. Please try again.');
+                    showNotification('Failed to add to cart. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                alert('Added to cart!');
+                showNotification('Added to cart!', 'success');
             }
         }
 
@@ -416,13 +416,8 @@
         function quickView(productId) {
             const product = braceletProducts.find(p => p.id === productId);
             if (product) {
-                alert(`${product.name}\n\n${product.description}\n\nPrice: ₹${product.currentPrice}\n\nClick "Add to Cart" to purchase!`);
+                showNotification(`${product.name} - ₹${product.currentPrice}`, 'info');
             }
-        }
-
-        // Update cart count
-        function updateCartCount() {
-            console.log('Cart updated');
         }
 
         // Use event delegation for dynamically created buttons
@@ -439,5 +434,6 @@
         // Load products on page load
         document.addEventListener('DOMContentLoaded', loadProducts);
     </script>
+    <script src="cart-common.js"></script>
 </body>
 </html>

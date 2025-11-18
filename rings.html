@@ -237,7 +237,7 @@
                     <li><a href="index.html#contact">Contact</a></li>
                 </ul>
                 <div class="nav-cta">
-                    <button class="btn-secondary" id="cart-button">Cart (0)</button>
+                    <button class="btn-secondary" data-cart-link>Cart (<span id="cart-count">0</span>)</button>
                 </div>
                 <div class="mobile-menu-toggle">
                     <span></span>
@@ -401,14 +401,14 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Ring added to cart! 🔥');
+                    showNotification('Ring added to cart! 🔥', 'success');
                     updateCartCount();
                 } else {
-                    alert('Failed to add to cart. Please try again.');
+                    showNotification('Failed to add to cart. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                alert('Added to cart!'); // Fallback for now
+                showNotification('Added to cart!', 'success');
             }
         }
 
@@ -416,14 +416,8 @@
         function quickView(productId) {
             const product = ringProducts.find(p => p.id === productId);
             if (product) {
-                alert(`${product.name}\n\n${product.description}\n\nPrice: ₹${product.currentPrice}\n\nClick "Add to Cart" to purchase!`);
+                showNotification(`${product.name} - ₹${product.currentPrice}`, 'info');
             }
-        }
-
-        // Update cart count
-        function updateCartCount() {
-            // This will be implemented with actual cart API
-            console.log('Cart updated');
         }
 
         // Use event delegation for dynamically created buttons
@@ -434,13 +428,12 @@
             } else if (e.target.matches('[data-action="quick-view"]')) {
                 const productId = parseInt(e.target.getAttribute('data-product-id'));
                 quickView(productId);
-            } else if (e.target.matches('#cart-button')) {
-                window.location.href = '#cart';
             }
         });
 
         // Load products on page load
         document.addEventListener('DOMContentLoaded', loadProducts);
     </script>
+    <script src="cart-common.js"></script>
 </body>
 </html>

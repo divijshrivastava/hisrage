@@ -215,6 +215,23 @@ router.put('/update/:itemId', async (req, res) => {
             return res.status(400).json({ error: 'Quantity must be at least 1' });
         }
 
+        const dbAvailable = await isDbAvailable();
+
+        if (!dbAvailable) {
+            // Use session-based cart
+            if (!req.session.cart) {
+                return res.status(404).json({ error: 'Cart item not found' });
+            }
+
+            const itemIndex = req.session.cart.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) {
+                return res.status(404).json({ error: 'Cart item not found' });
+            }
+
+            req.session.cart[itemIndex].quantity = quantity;
+            return res.json({ message: 'Cart updated successfully' });
+        }
+
         // Get cart item with product details
         const item = await db.query(`
             SELECT ci.*, p.stock_quantity
@@ -247,6 +264,23 @@ router.put('/update/:itemId', async (req, res) => {
 router.delete('/remove/:itemId', async (req, res) => {
     try {
         const { itemId } = req.params;
+
+        const dbAvailable = await isDbAvailable();
+
+        if (!dbAvailable) {
+            // Use session-based cart
+            if (!req.session.cart) {
+                return res.status(404).json({ error: 'Cart item not found' });
+            }
+
+            const itemIndex = req.session.cart.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) {
+                return res.status(404).json({ error: 'Cart item not found' });
+            }
+
+            req.session.cart.splice(itemIndex, 1);
+            return res.json({ message: 'Item removed from cart' });
+        }
 
         await db.query('DELETE FROM cart_items WHERE id = $1', [itemId]);
 
