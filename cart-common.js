@@ -177,4 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'cart.html';
         });
     });
+
+    // Shop Now button navigation (homepage)
+    const shopNowBtn = document.getElementById('shop-now-btn');
+    if (shopNowBtn) {
+        shopNowBtn.addEventListener('click', () => {
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
 });
