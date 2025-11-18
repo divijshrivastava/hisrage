@@ -212,7 +212,17 @@ router.post('/add', async (req, res) => {
             );
         }
 
-        res.json({ message: 'Item added to cart successfully' });
+        // Get updated cart count
+        const cartItems = await db.query(
+            'SELECT * FROM cart_items WHERE cart_id = $1',
+            [cart.id]
+        );
+        const itemCount = cartItems.rows.reduce((sum, item) => sum + item.quantity, 0);
+
+        res.json({
+            message: 'Item added to cart successfully',
+            item_count: itemCount
+        });
     } catch (error) {
         console.error('Error adding to cart:', error);
         res.status(500).json({ error: 'Failed to add item to cart' });
