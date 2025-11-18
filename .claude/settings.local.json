@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc:*)",
+      "Bash(code .)",
+      "Bash(flyctl auth whoami:*)",
+      "Bash(npm install:*)",
+      "Bash(flyctl postgres create:*)",
+      "Bash(flyctl launch:*)",
+      "Bash(flyctl secrets set:*)",
+      "Bash(RAZORPAY_KEY_ID=\"your_razorpay_key_id\":*)",
+      "Bash(RAZORPAY_KEY_SECRET=\"your_razorpay_key_secret\":*)",
+      "Bash(STRIPE_PUBLISHABLE_KEY=\"your_stripe_publishable_key\" )",
+      "Bash(STRIPE_SECRET_KEY=\"your_stripe_secret_key\":*)",
+      "Bash(FRONTEND_URL=\"https://hisrage.com\":*)",
+      "Bash(PAYMENT_SUCCESS_URL=\"https://hisrage.com/payment/success\" )",
+      "Bash(PAYMENT_FAILURE_URL=\"https://hisrage.com/payment/failure\" )",
+      "Bash(flyctl deploy:*)",
+      "Bash(flyctl ssh console:*)",
+      "Bash(flyctl certs create:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
