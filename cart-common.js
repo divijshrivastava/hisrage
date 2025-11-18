@@ -27,6 +27,20 @@ async function updateCartCount(count) {
             el.style.color = '';
         }, 300);
     });
+
+    // Switch between Shop Now and Cart button on homepage
+    const shopNowBtn = document.getElementById('shop-now-btn');
+    const cartBtn = document.getElementById('cart-btn');
+
+    if (shopNowBtn && cartBtn) {
+        if (count > 0) {
+            shopNowBtn.style.display = 'none';
+            cartBtn.style.display = 'block';
+        } else {
+            shopNowBtn.style.display = 'block';
+            cartBtn.style.display = 'none';
+        }
+    }
 }
 
 // Custom notification system
