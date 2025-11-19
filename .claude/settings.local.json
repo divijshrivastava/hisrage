@@ -27,7 +27,8 @@
       "Bash(flyctl tokens create:*)",
       "Bash(gh secret set:*)",
       "Bash(gh run:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(flyctl logs:*)"
     ],
     "deny": [],
     "ask": []

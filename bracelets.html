@@ -424,11 +424,9 @@
 
         // Quick view function
         function quickView(productId) {
-            const product = braceletProducts.find(p => p.id === productId);
-            if (product) {
-                showNotification(`${product.name} - ₹${product.currentPrice}`, 'info');
-            }
+            window.location.href = `product-detail.html?id=${productId}`;
         }
+
 
         // Use event delegation for dynamically created buttons
         document.addEventListener('click', function(e) {

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - HisRage</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .product-detail-section {
+            padding: 8rem 0 4rem;
+            min-height: 100vh;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--rage-red);
+            transform: translateX(-5px);
+        }
+
+        .product-detail-container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Image Carousel */
+        .product-images {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .main-image-container {
+            width: 100%;
+            height: 600px;
+            background-color: #000;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: zoom-in;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 1rem;
+            pointer-events: none;
+        }
+
+        .carousel-btn {
+            background-color: rgba(212, 175, 55, 0.8);
+            border: none;
+            color: var(--bg-darker);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            pointer-events: all;
+        }
+
+        .carousel-btn:hover {
+            background-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .thumbnail-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 100px;
+            background-color: #000;
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .thumbnail.active {
+            border-color: var(--primary-color);
+        }
+
+        .thumbnail:hover {
+            border-color: var(--rage-red);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Product Info */
+        .product-info {
+            color: var(--text-primary);
+        }
+
+        .product-badge {
+            display: inline-block;
+            background-color: var(--rage-red);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .product-name {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .product-price-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background-color: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .product-price {
+            font-size: 3rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-compare-price {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            margin-right: 1rem;
+        }
+
+        .product-discount {
+            display: inline-block;
+            background-color: var(--rage-red);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .product-stock {
+            margin-top: 1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .product-stock.low {
+            color: var(--rage-red);
+        }
+
+        .product-description {
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .product-features {
+            margin-bottom: 2rem;
+        }
+
+        .product-features h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li::before {
+            content: "✓ ";
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-right: 0.8rem;
+        }
+
+        .product-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: rgba(26, 26, 26, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .meta-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quantity-selector label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 0.5rem 1rem;
+        }
+
+        .quantity-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            color: var(--rage-red);
+        }
+
+        .quantity-value {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-add-cart {
+            flex: 2;
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+            padding: 1.5rem;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-add-cart:hover {
+            background-color: #e6c555;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-buy-now {
+            flex: 1;
+            background-color: transparent;
+            color: var(--text-primary);
+            padding: 1.5rem;
+            border: 2px solid var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+        }
+
+        .btn-buy-now:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+        }
+
+        .product-guarantee {
+            padding: 2rem;
+            background-color: rgba(26, 26, 26, 0.3);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .guarantee-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .guarantee-list {
+            list-style: none;
+            color: var(--text-secondary);
+        }
+
+        .guarantee-list li {
+            padding: 0.5rem 0;
+        }
+
+        .guarantee-list li::before {
+            content: "🔥 ";
+            margin-right: 0.5rem;
+        }
+
+        /* Image Zoom Modal */
+        .image-zoom-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-zoom-modal.active {
+            display: flex;
+        }
+
+        .zoom-image {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .close-zoom {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .close-zoom:hover {
+            color: var(--rage-red);
+        }
+
+        @media (max-width: 968px) {
+            .product-detail-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .product-images {
+                position: static;
+            }
+
+            .main-image-container {
+                height: 400px;
+            }
+
+            .product-name {
+                font-size: 2rem;
+            }
+
+            .product-price {
+                font-size: 2rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .product-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">HISRAGE</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#products">Products</a></li>
+                    <li><a href="index.html#about">About</a></li>
+                    <li><a href="index.html#warranty">Warranty</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <button class="btn-secondary" data-cart-link>Cart (<span id="cart-count">0</span>)</button>
+                </div>
+                <div class="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Detail Section -->
+    <section class="product-detail-section">
+        <div class="container">
+            <a href="javascript:history.back()" class="back-link">← Back</a>
+
+            <div id="productContent" style="min-height: 400px;">
+                <div style="text-align: center; padding: 4rem; color: var(--text-secondary);">
+                    Loading product...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="image-zoom-modal">
+        <button class="close-zoom" id="closeZoom">&times;</button>
+        <img id="zoomImage" class="zoom-image" src="" alt="Zoomed product image">
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">HISRAGE</h3>
+                    <p class="footer-description">Steel forged in fury. Worn by warriors. 316L stainless steel jewellery for men who refuse to be tamed.</p>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#products">Products</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#warranty">Warranty</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Policies</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 HisRage. All rights reserved. Forged for Warriors.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="cart-common.js"></script>
+    <script>
+        let currentImageIndex = 0;
+        let productImages = [];
+        let currentProduct = null;
+        let quantity = 1;
+
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        // Load product details
+        async function loadProduct() {
+            if (!productId) {
+                document.getElementById('productContent').innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: var(--text-secondary);">
+                        <h2>Product not found</h2>
+                        <p>The product you're looking for doesn't exist.</p>
+                        <a href="index.html#products" class="btn-primary" style="display: inline-block; margin-top: 2rem;">Back to Products</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/products/${productId}`);
+                const product = await response.json();
+
+                if (response.ok) {
+                    currentProduct = product;
+                    displayProduct(product);
+                } else {
+                    throw new Error('Product not found');
+                }
+            } catch (error) {
+                console.error('Error loading product:', error);
+                document.getElementById('productContent').innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: var(--text-secondary);">
+                        <h2>Error loading product</h2>
+                        <p>We couldn't load this product. Please try again.</p>
+                        <a href="index.html#products" class="btn-primary" style="display: inline-block; margin-top: 2rem;">Back to Products</a>
+                    </div>
+                `;
+            }
+        }
+
+        function displayProduct(product) {
+            // Prepare images array
+            productImages = product.images && product.images.length > 0
+                ? product.images
+                : (product.image_url ? [product.image_url] : ['/images/placeholder.jpg']);
+
+            // Calculate discount
+            let discountPercent = 0;
+            if (product.compare_at_price && product.compare_at_price > product.price) {
+                discountPercent = Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100);
+            }
+
+            const html = `
+                <div class="product-detail-container">
+                    <!-- Image Carousel -->
+                    <div class="product-images">
+                        <div class="main-image-container">
+                            <img id="mainImage" class="main-image" src="${productImages[0]}" alt="${product.name}">
+                            ${productImages.length > 1 ? `
+                                <div class="carousel-controls">
+                                    <button class="carousel-btn" id="prevBtn">‹</button>
+                                    <button class="carousel-btn" id="nextBtn">›</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${productImages.length > 1 ? `
+                            <div class="thumbnail-container" id="thumbnailContainer">
+                                ${productImages.map((img, idx) => `
+                                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+                                        <img src="${img}" alt="${product.name} ${idx + 1}">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        ${product.featured ? '<div class="product-badge">Featured</div>' : ''}
+
+                        <h1 class="product-name">${product.name}</h1>
+
+                        <div class="product-rating">
+                            ★★★★★ <span style="color: var(--text-secondary);">(${Math.floor(Math.random() * 50 + 20)} reviews)</span>
+                        </div>
+
+                        <div class="product-price-section">
+                            <div class="product-price">₹${parseFloat(product.price).toLocaleString()}</div>
+                            ${product.compare_at_price ? `
+                                <div>
+                                    <span class="product-compare-price">₹${parseFloat(product.compare_at_price).toLocaleString()}</span>
+                                    <span class="product-discount">Save ${discountPercent}%</span>
+                                </div>
+                            ` : ''}
+                            <div class="product-stock ${product.stock_quantity < 10 ? 'low' : ''}">
+                                ${product.stock_quantity > 0
+                                    ? product.stock_quantity < 10
+                                        ? `⚠️ Only ${product.stock_quantity} left in stock!`
+                                        : `✓ In Stock (${product.stock_quantity} available)`
+                                    : '✗ Out of Stock'}
+                            </div>
+                        </div>
+
+                        <div class="product-description">
+                            ${product.description || 'No description available.'}
+                        </div>
+
+                        <div class="product-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">SKU</span>
+                                <span class="meta-value">${product.sku}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Material</span>
+                                <span class="meta-value">${product.material || '316L Stainless Steel'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Category</span>
+                                <span class="meta-value">${product.category_name || 'N/A'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Warranty</span>
+                                <span class="meta-value">6 Months</span>
+                            </div>
+                        </div>
+
+                        ${product.stock_quantity > 0 ? `
+                            <div class="quantity-selector">
+                                <label>Quantity:</label>
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn" id="decreaseQty">−</button>
+                                    <span class="quantity-value" id="quantityValue">1</span>
+                                    <button class="quantity-btn" id="increaseQty">+</button>
+                                </div>
+                            </div>
+
+                            <div class="product-actions">
+                                <button class="btn-add-cart" id="addToCartBtn">Add to Arsenal</button>
+                                <button class="btn-buy-now" id="buyNowBtn">Buy Now</button>
+                            </div>
+                        ` : `
+                            <div style="padding: 2rem; background-color: rgba(204, 0, 0, 0.1); border: 1px solid var(--rage-red); text-align: center; color: var(--rage-red); font-weight: 600;">
+                                This item is currently out of stock
+                            </div>
+                        `}
+
+                        <div class="product-features">
+                            <h3>Features</h3>
+                            <ul class="feature-list">
+                                <li>Premium ${product.material || '316L Stainless Steel'}</li>
+                                <li>Non-tarnish finish</li>
+                                <li>6-month warranty included</li>
+                                <li>Free shipping on orders above ₹2000</li>
+                                <li>Handcrafted quality</li>
+                                <li>Hypoallergenic material</li>
+                            </ul>
+                        </div>
+
+                        <div class="product-guarantee">
+                            <div class="guarantee-title">HisRage Guarantee</div>
+                            <ul class="guarantee-list">
+                                <li>100% Authentic Products</li>
+                                <li>Secure Payment</li>
+                                <li>Easy Returns & Exchange</li>
+                                <li>6-Month Warranty</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('productContent').innerHTML = html;
+
+            // Initialize carousel and event listeners
+            if (productImages.length > 1) {
+                initializeCarousel();
+            }
+
+            // Image zoom
+            document.getElementById('mainImage').addEventListener('click', () => {
+                openImageZoom(productImages[currentImageIndex]);
+            });
+
+            // Quantity controls
+            if (product.stock_quantity > 0) {
+                document.getElementById('decreaseQty').addEventListener('click', () => {
+                    if (quantity > 1) {
+                        quantity--;
+                        document.getElementById('quantityValue').textContent = quantity;
+                    }
+                });
+
+                document.getElementById('increaseQty').addEventListener('click', () => {
+                    if (quantity < product.stock_quantity) {
+                        quantity++;
+                        document.getElementById('quantityValue').textContent = quantity;
+                    } else {
+                        showNotification(`Only ${product.stock_quantity} available in stock`, 'error');
+                    }
+                });
+
+                // Add to cart
+                document.getElementById('addToCartBtn').addEventListener('click', addToCart);
+
+                // Buy now
+                document.getElementById('buyNowBtn').addEventListener('click', () => {
+                    addToCart(true);
+                });
+            }
+        }
+
+        function initializeCarousel() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+
+            prevBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
+                updateMainImage();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex + 1) % productImages.length;
+                updateMainImage();
+            });
+
+            thumbnails.forEach((thumb, index) => {
+                thumb.addEventListener('click', () => {
+                    currentImageIndex = index;
+                    updateMainImage();
+                });
+            });
+        }
+
+        function updateMainImage() {
+            document.getElementById('mainImage').src = productImages[currentImageIndex];
+
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach((thumb, idx) => {
+                thumb.classList.toggle('active', idx === currentImageIndex);
+            });
+        }
+
+        // Image zoom modal
+        const zoomModal = document.getElementById('imageZoomModal');
+        const closeZoomBtn = document.getElementById('closeZoom');
+
+        function openImageZoom(imageSrc) {
+            document.getElementById('zoomImage').src = imageSrc;
+            zoomModal.classList.add('active');
+        }
+
+        closeZoomBtn.addEventListener('click', () => {
+            zoomModal.classList.remove('active');
+        });
+
+        zoomModal.addEventListener('click', (e) => {
+            if (e.target === zoomModal) {
+                zoomModal.classList.remove('active');
+            }
+        });
+
+        // Add to cart function
+        async function addToCart(buyNow = false) {
+            try {
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        product_id: currentProduct.id,
+                        quantity: quantity
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showNotification(`Added ${quantity} ${currentProduct.name} to cart! 🔥`, 'success');
+
+                    if (data.item_count !== undefined) {
+                        updateCartCount(data.item_count);
+                    } else {
+                        updateCartCount();
+                    }
+
+                    if (buyNow) {
+                        // Redirect to cart for checkout
+                        setTimeout(() => {
+                            window.location.href = 'cart.html';
+                        }, 1000);
+                    } else {
+                        // Reset quantity
+                        quantity = 1;
+                        document.getElementById('quantityValue').textContent = quantity;
+                    }
+                } else {
+                    showNotification(data.error || 'Failed to add to cart. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('Error adding to cart', 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProduct();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

@@ -41,17 +41,20 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get single product by slug
-router.get('/:slug', async (req, res) => {
+// Get single product by ID or slug
+router.get('/:identifier', async (req, res) => {
     try {
-        const { slug } = req.params;
+        const { identifier } = req.params;
+
+        // Check if identifier is a number (ID) or string (slug)
+        const isId = !isNaN(identifier);
 
         const result = await db.query(`
             SELECT p.*, c.name as category_name, c.slug as category_slug
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
-            WHERE p.slug = $1 AND p.is_active = TRUE
-        `, [slug]);
+            WHERE ${isId ? 'p.id = $1' : 'p.slug = $1'} AND p.is_active = TRUE
+        `, [isId ? parseInt(identifier) : identifier]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
