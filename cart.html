@@ -420,8 +420,8 @@
                                 <span class="summary-label">Total</span>
                                 <span class="summary-total">₹${(parseFloat(data.subtotal) + (parseFloat(data.subtotal) >= 2000 ? 0 : 99)).toLocaleString()}</span>
                             </div>
-                            <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
-                            <button class="continue-shopping" onclick="window.location.href='index.html#products'">Continue Shopping</button>
+                            <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+                            <button class="continue-shopping" id="continue-shopping-btn">Continue Shopping</button>
                         </div>
                     </div>
                 `;
@@ -503,6 +503,15 @@
         function checkout() {
             showNotification('Checkout coming soon! Payment integration in progress.', 'info');
         }
+
+        // Add event listeners for buttons (event delegation won't work for dynamically created content)
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'checkout-btn') {
+                checkout();
+            } else if (e.target.id === 'continue-shopping-btn') {
+                window.location.href = 'index.html#products';
+            }
+        });
 
         // Load cart on page load
         document.addEventListener('DOMContentLoaded', loadCart);
