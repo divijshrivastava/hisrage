@@ -136,14 +136,19 @@ router.post('/add', async (req, res) => {
             );
 
             if (product.rows.length === 0) {
-                return res.status(404).json({ error: 'Product not found' });
-            }
+                // Fallback to product data map if not in database
+                productData = productDataMap[product_id];
+                if (!productData) {
+                    return res.status(404).json({ error: 'Product not found' });
+                }
+                console.log('Using fallback product data for product', product_id);
+            } else {
+                productData = product.rows[0];
 
-            productData = product.rows[0];
-
-            // Check stock
-            if (productData.stock_quantity < quantity) {
-                return res.status(400).json({ error: 'Insufficient stock' });
+                // Check stock
+                if (productData.stock_quantity < quantity) {
+                    return res.status(400).json({ error: 'Insufficient stock' });
+                }
             }
         }
 
