@@ -915,18 +915,71 @@
             }
         }
 
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok || response.status === 401) {
+                    // Not authenticated, redirect to login
+                    window.location.href = 'admin-login.html';
+                    return false;
+                }
+
+                const user = await response.json();
+
+                if (!user.is_admin) {
+                    // Not an admin, redirect to home
+                    showNotification('Access denied. Admin privileges required.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+        }
+
         // Logout
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            // For now, just redirect to home
-            // In production, you'd want to actually clear the session
-            window.location.href = 'index.html';
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    showNotification('Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'admin-login.html';
+                    }, 1000);
+                } else {
+                    throw new Error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Redirect anyway
+                window.location.href = 'admin-login.html';
+            }
         });
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCategories();
-            loadProducts();
-            updateCartCount();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication first
+            const isAuthenticated = await checkAuth();
+
+            if (isAuthenticated) {
+                loadCategories();
+                loadProducts();
+                updateCartCount();
+            }
         });
     </script>
 </body>

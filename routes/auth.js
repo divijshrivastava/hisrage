@@ -102,6 +102,67 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Admin Login (requires admin privileges)
+router.post('/admin-login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        // Get user
+        const result = await db.query(
+            'SELECT * FROM users WHERE email = $1',
+            [email]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const user = result.rows[0];
+
+        // Check if user is admin
+        if (!user.is_admin) {
+            return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+        }
+
+        // Verify password
+        const isValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Set session
+        req.session.userId = user.id;
+        req.session.isAdmin = user.is_admin;
+
+        // Save session explicitly to ensure it persists
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Login failed' });
+            }
+
+            res.json({
+                message: 'Admin login successful',
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    is_admin: user.is_admin
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
 // Logout
 router.post('/logout', (req, res) => {
     req.session.destroy((err) => {

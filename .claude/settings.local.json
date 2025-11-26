@@ -28,7 +28,8 @@
       "Bash(gh secret set:*)",
       "Bash(gh run:*)",
       "Bash(curl:*)",
-      "Bash(flyctl logs:*)"
+      "Bash(flyctl logs:*)",
+      "Bash(node create-admin.js:*)"
     ],
     "deny": [],
     "ask": []
