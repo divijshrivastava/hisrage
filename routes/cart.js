@@ -6,14 +6,20 @@ const db = require('../db/config');
 async function getOrCreateCart(userId, sessionId) {
     console.log('getOrCreateCart called with userId:', userId, 'sessionId:', sessionId);
 
+    // Try to find cart by user_id OR session_id
     let cart;
-
-    if (userId) {
+    if (userId && sessionId) {
+        cart = await db.query(
+            'SELECT * FROM carts WHERE user_id = $1 OR session_id = $2 ORDER BY user_id DESC LIMIT 1',
+            [userId, sessionId]
+        );
+        console.log('Found cart by userId OR sessionId:', cart.rows.length);
+    } else if (userId) {
         cart = await db.query('SELECT * FROM carts WHERE user_id = $1', [userId]);
         console.log('Found cart by userId:', cart.rows.length);
     } else if (sessionId) {
         cart = await db.query('SELECT * FROM carts WHERE session_id = $1', [sessionId]);
-        console.log('Found cart by sessionId:', cart.rows.length, 'sessionId:', sessionId);
+        console.log('Found cart by sessionId:', cart.rows.length);
     }
 
     if (cart && cart.rows.length > 0) {
@@ -22,7 +28,7 @@ async function getOrCreateCart(userId, sessionId) {
     }
 
     // Create new cart
-    console.log('Creating new cart for sessionId:', sessionId);
+    console.log('Creating new cart for userId:', userId, 'sessionId:', sessionId);
     const newCart = await db.query(
         'INSERT INTO carts (user_id, session_id) VALUES ($1, $2) RETURNING *',
         [userId || null, sessionId || null]
