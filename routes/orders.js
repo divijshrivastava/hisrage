@@ -42,17 +42,31 @@ router.post('/create', async (req, res) => {
         const userId = req.session.userId || null;
         const sessionId = req.session.id;
 
+        console.log('Order creation - Session ID:', sessionId, 'User ID:', userId);
+
+        // Try to find cart by user_id OR session_id (same logic as cart.js)
         let cart;
-        if (userId) {
+        if (userId && sessionId) {
+            cart = await client.query(
+                'SELECT * FROM carts WHERE user_id = $1 OR session_id = $2 ORDER BY user_id DESC LIMIT 1',
+                [userId, sessionId]
+            );
+            console.log('Found cart by userId OR sessionId:', cart.rows.length);
+        } else if (userId) {
             cart = await client.query('SELECT * FROM carts WHERE user_id = $1', [userId]);
-        } else {
+            console.log('Found cart by userId:', cart.rows.length);
+        } else if (sessionId) {
             cart = await client.query('SELECT * FROM carts WHERE session_id = $1', [sessionId]);
+            console.log('Found cart by sessionId:', cart.rows.length);
         }
 
         if (!cart || cart.rows.length === 0) {
             await client.query('ROLLBACK');
+            console.log('No cart found - returning error');
             return res.status(400).json({ error: 'Cart is empty' });
         }
+
+        console.log('Using cart ID:', cart.rows[0].id);
 
         const cartId = cart.rows[0].id;
 
