@@ -501,7 +501,8 @@
 
         // Checkout function
         function checkout() {
-            showNotification('Checkout coming soon! Payment integration in progress.', 'info');
+            // Redirect to checkout page
+            window.location.href = 'checkout.html';
         }
 
         // Add event listeners for buttons (event delegation won't work for dynamically created content)

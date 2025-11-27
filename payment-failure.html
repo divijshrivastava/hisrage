@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - HisRage</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .failure-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 150px 2rem 4rem;
+            text-align: center;
+        }
+
+        .failure-icon {
+            font-size: 5rem;
+            color: var(--rage-red);
+            margin-bottom: 2rem;
+        }
+
+        .failure-title {
+            font-size: 2.5rem;
+            color: var(--rage-red);
+            margin-bottom: 1rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .failure-message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        .order-info {
+            background-color: rgba(26, 26, 26, 0.5);
+            border: 1px solid rgba(204, 0, 0, 0.3);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .order-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .help-box {
+            background-color: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .help-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .help-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .help-box li {
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .help-box li::before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+        }
+
+        .btn-primary:hover {
+            background-color: #e6c555;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-darker);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .failure-title {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">HISRAGE</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#products">Products</a></li>
+                    <li><a href="index.html#about">About</a></li>
+                    <li><a href="index.html#warranty">Warranty</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+                <div class="nav-cta">
+                    <a href="cart.html" class="btn-secondary">Cart (<span id="cart-count">0</span>)</a>
+                </div>
+                <div class="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Failure Container -->
+    <div class="failure-container">
+        <div class="failure-icon">✕</div>
+        <h1 class="failure-title">Payment Failed</h1>
+        <p class="failure-message">Unfortunately, your payment could not be processed. Please try again.</p>
+
+        <div class="order-info" id="order-info">
+            <div class="loading">Loading order information...</div>
+        </div>
+
+        <div class="help-box">
+            <h4>Common reasons for payment failure:</h4>
+            <ul>
+                <li>Insufficient funds in your account</li>
+                <li>Incorrect card details or expired card</li>
+                <li>Payment gateway timeout or network issues</li>
+                <li>Bank declined the transaction</li>
+                <li>International payments not enabled on your card</li>
+            </ul>
+        </div>
+
+        <div class="help-box" style="border-left-color: var(--rage-red); background-color: rgba(204, 0, 0, 0.05);">
+            <h4>What to do next?</h4>
+            <ul>
+                <li>Check your payment method and try again</li>
+                <li>Try using a different payment method</li>
+                <li>Contact your bank if the problem persists</li>
+                <li>For Cash on Delivery, you can still complete your order</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="checkout.html" class="btn btn-primary" id="retry-payment-btn">Retry Payment</a>
+            <a href="cart.html" class="btn btn-secondary">Back to Cart</a>
+            <a href="index.html#contact" class="btn btn-secondary">Contact Support</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">HISRAGE</h3>
+                    <p class="footer-description">Steel forged in fury. Worn by warriors. 316L stainless steel jewellery for men who refuse to be tamed.</p>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#products">Products</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#warranty">Warranty</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Policies</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Return Policy</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 HisRage. All rights reserved. Forged for Warriors.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="cart-common.js"></script>
+    <script>
+        async function loadOrderInfo() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNumber = urlParams.get('order');
+
+            if (!orderNumber) {
+                document.getElementById('order-info').innerHTML = `
+                    <p style="color: var(--text-secondary); text-align: center;">
+                        Your order was not completed. Please try placing your order again.
+                    </p>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/orders/${orderNumber}`, {
+                    credentials: 'include'
+                });
+
+                const order = await response.json();
+
+                if (response.ok) {
+                    displayOrderInfo(order);
+                } else {
+                    document.getElementById('order-info').innerHTML = `
+                        <p style="color: var(--text-secondary); text-align: center;">
+                            Order #${orderNumber} - Payment pending
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading order:', error);
+                document.getElementById('order-info').innerHTML = `
+                    <p style="color: var(--text-secondary); text-align: center;">
+                        Unable to load order details
+                    </p>
+                `;
+            }
+        }
+
+        function displayOrderInfo(order) {
+            const infoContainer = document.getElementById('order-info');
+
+            infoContainer.innerHTML = `
+                <h3>Order Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Order Number</span>
+                    <span class="info-value">${order.order_number}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Order Amount</span>
+                    <span class="info-value">₹${parseFloat(order.total).toLocaleString()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Method</span>
+                    <span class="info-value">${getPaymentMethodName(order.payment_method)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Status</span>
+                    <span class="info-value" style="color: var(--rage-red);">${getStatusText(order.payment_status)}</span>
+                </div>
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid rgba(212, 175, 55, 0.2);">
+                    <p style="color: var(--text-secondary); text-align: center;">
+                        Your order has been created but payment was not completed.<br>
+                        You can try paying again or contact our support for assistance.
+                    </p>
+                </div>
+            `;
+
+            // Update retry button to go back to checkout
+            const retryBtn = document.getElementById('retry-payment-btn');
+            // Keep it going to checkout.html to create a new order
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'razorpay': 'Razorpay',
+                'stripe': 'Stripe',
+                'cod': 'Cash on Delivery'
+            };
+            return methods[method] || method;
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'paid': 'Paid',
+                'pending': 'Payment Pending',
+                'failed': 'Payment Failed',
+                'refunded': 'Refunded'
+            };
+            return statuses[status] || status;
+        }
+
+        // Load order info on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrderInfo();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

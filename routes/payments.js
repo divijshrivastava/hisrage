@@ -120,7 +120,7 @@ router.post('/razorpay/verify', async (req, res) => {
     }
 });
 
-// Create Stripe payment intent
+// Create Stripe checkout session
 router.post('/stripe/create', async (req, res) => {
     if (!stripe) {
         return res.status(503).json({ error: 'Stripe is not configured' });
@@ -128,7 +128,7 @@ router.post('/stripe/create', async (req, res) => {
     try {
         const { order_id } = req.body;
 
-        // Get order details
+        // Get order details with items
         const orderResult = await db.query(
             'SELECT * FROM orders WHERE id = $1',
             [order_id]
@@ -140,30 +140,68 @@ router.post('/stripe/create', async (req, res) => {
 
         const order = orderResult.rows[0];
 
-        // Create Stripe payment intent
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(parseFloat(order.total) * 100), // Convert to cents/paise
-            currency: 'inr',
-            metadata: {
-                order_id: order.id,
-                order_number: order.order_number
+        // Get order items
+        const itemsResult = await db.query(
+            'SELECT * FROM order_items WHERE order_id = $1',
+            [order_id]
+        );
+
+        // Create line items for Stripe
+        const lineItems = itemsResult.rows.map(item => ({
+            price_data: {
+                currency: 'inr',
+                product_data: {
+                    name: item.product_name || 'Product',
+                    description: item.product_description || '',
+                },
+                unit_amount: Math.round(parseFloat(item.price) * 100), // Convert to paise
             },
-            description: `HisRage Order ${order.order_number}`
+            quantity: item.quantity,
+        }));
+
+        // Add shipping as a line item if > 0
+        if (parseFloat(order.shipping_cost) > 0) {
+            lineItems.push({
+                price_data: {
+                    currency: 'inr',
+                    product_data: {
+                        name: 'Shipping',
+                    },
+                    unit_amount: Math.round(parseFloat(order.shipping_cost) * 100),
+                },
+                quantity: 1,
+            });
+        }
+
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+        // Create Stripe Checkout Session
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: `${frontendUrl}/payment-success.html?order=${order.order_number}`,
+            cancel_url: `${frontendUrl}/payment-failure.html?order=${order.order_number}`,
+            customer_email: order.email,
+            metadata: {
+                order_id: order.id.toString(),
+                order_number: order.order_number
+            }
         });
 
-        // Update order with Stripe payment intent ID
+        // Update order with Stripe session ID
         await db.query(
             'UPDATE orders SET stripe_payment_intent_id = $1 WHERE id = $2',
-            [paymentIntent.id, order.id]
+            [session.id, order.id]
         );
 
         res.json({
-            client_secret: paymentIntent.client_secret,
+            session_id: session.id,
             publishable_key: process.env.STRIPE_PUBLISHABLE_KEY
         });
     } catch (error) {
-        console.error('Stripe payment intent creation error:', error);
-        res.status(500).json({ error: 'Failed to create payment intent' });
+        console.error('Stripe checkout session creation error:', error);
+        res.status(500).json({ error: 'Failed to create checkout session' });
     }
 });
 
@@ -188,10 +226,22 @@ router.post('/stripe/webhook', express.raw({ type: 'application/json' }), async 
     }
 
     // Handle the event
-    if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
 
         // Update order
+        await db.query(`
+            UPDATE orders
+            SET
+                payment_status = 'paid',
+                paid_at = CURRENT_TIMESTAMP,
+                status = 'confirmed'
+            WHERE stripe_payment_intent_id = $1
+        `, [session.id]);
+    } else if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+
+        // Update order (fallback for payment intent)
         await db.query(`
             UPDATE orders
             SET
