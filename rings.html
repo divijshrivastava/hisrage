@@ -308,80 +308,70 @@
     </footer>
 
     <script>
-        // Ring products data
-        const ringProducts = [
-            {
-                id: 1,
-                name: 'Warrior Signet Ring',
-                image: 'images/rings/pexels-shkrabaanthony-7167017.jpg',
-                description: 'Bold signet ring engraved with ancient warrior symbols. Forged in 316L stainless steel to withstand any battle.',
-                currentPrice: 1499,
-                originalPrice: 1999,
-                badge: 'Featured',
-                features: ['316L Stainless Steel', 'Non-tarnish finish', '6-month warranty', 'Premium packaging']
-            },
-            {
-                id: 2,
-                name: 'Alpha Dominance Ring',
-                image: 'images/rings/pexels-bayo-taiwo-1056397630-24268495.jpg',
-                description: 'Channel your inner alpha with this commanding ring. Non-tarnish steel that never backs down.',
-                currentPrice: 1299,
-                originalPrice: 1699,
-                badge: 'Best Seller',
-                features: ['316L Stainless Steel', 'Adjustable fit', '6-month warranty', 'Free shipping']
-            },
-            {
-                id: 3,
-                name: 'Primal Power Ring',
-                image: 'images/rings/pexels-kevin-yung-2152346613-33547910.jpg',
-                description: 'Raw power meets refined design. This ring embodies the untamed spirit of the modern warrior.',
-                currentPrice: 1599,
-                originalPrice: 2199,
-                badge: 'New',
-                features: ['316L Stainless Steel', 'Unique design', '6-month warranty', 'COD available']
-            },
-            {
-                id: 4,
-                name: 'Rage Band',
-                image: 'images/rings/pexels-japy-18747845.jpg',
-                description: 'Minimal yet powerful. This band embodies controlled fury and raw masculine strength.',
-                currentPrice: 899,
-                originalPrice: 1199,
-                badge: 'Sale',
-                features: ['316L Stainless Steel', 'Lightweight', '6-month warranty', 'Premium quality']
-            }
-        ];
+        let ringProducts = [];
 
-        // Load products
-        function loadProducts() {
+        // Load products from API
+        async function loadProducts() {
             const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">Loading products...</div>';
 
-            ringProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}">
-                        <div class="product-badge">${product.badge}</div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-price">
-                            <span class="current-price">₹${product.currentPrice.toLocaleString()}</span>
-                            <span class="original-price">₹${product.originalPrice.toLocaleString()}</span>
+            try {
+                const response = await fetch('/api/products?category=rings&limit=50');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error('Failed to load products');
+                }
+
+                ringProducts = data.products || [];
+
+                if (ringProducts.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">No rings available at the moment.</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+
+                ringProducts.forEach(product => {
+                    const badge = product.featured ? 'Featured' :
+                                 product.stock_quantity < 10 ? 'Low Stock' : 'Available';
+
+                    const features = [
+                        product.material || '316L Stainless Steel',
+                        'Non-tarnish finish',
+                        '6-month warranty',
+                        product.stock_quantity > 0 ? 'In Stock' : 'Pre-order'
+                    ];
+
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <div class="product-image">
+                            <img src="${product.image_url}" alt="${product.name}">
+                            <div class="product-badge">${badge}</div>
                         </div>
-                        <ul class="product-features">
-                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
-                        </ul>
-                        <div class="product-actions">
-                            <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
-                            <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-description">${product.description || 'Premium ring crafted with excellence.'}</p>
+                            <div class="product-price">
+                                <span class="current-price">₹${parseFloat(product.price).toLocaleString()}</span>
+                                ${product.compare_at_price ? `<span class="original-price">₹${parseFloat(product.compare_at_price).toLocaleString()}</span>` : ''}
+                            </div>
+                            <ul class="product-features">
+                                ${features.map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                            <div class="product-actions">
+                                <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
+                                <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                grid.appendChild(productCard);
-            });
+                    `;
+                    grid.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+                grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--rage-red);">Failed to load products. Please refresh the page.</div>';
+            }
         }
 
         // Add to cart function

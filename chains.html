@@ -308,80 +308,69 @@
     </footer>
 
     <script>
-        // Chain products data
-        const chainProducts = [
-            {
-                id: 9,
-                name: 'Dominance Chain',
-                image: 'images/chains/chain1.jpg',
-                description: 'Thick steel chain that commands respect. Not for the weak. Pure power around your neck.',
-                currentPrice: 2499,
-                originalPrice: 3299,
-                badge: 'Featured',
-                features: ['316L Stainless Steel', 'Heavy gauge links', '6-month warranty', 'Multiple lengths']
-            },
-            {
-                id: 10,
-                name: 'Rage Pendant Chain',
-                image: 'images/chains/chain2.jpg',
-                description: 'Medium-weight chain with signature HisRage pendant. Subtle yet powerful statement.',
-                currentPrice: 1799,
-                originalPrice: 2399,
-                badge: 'Best Seller',
-                features: ['316L Stainless Steel', 'Custom pendant', '6-month warranty', 'Adjustable length']
-            },
-            {
-                id: 11,
-                name: 'Alpha Chain',
-                image: 'images/chains/chain3.jpg',
-                description: 'Premium heavyweight chain for those who lead the pack. Maximum impact.',
-                currentPrice: 2999,
-                originalPrice: 3999,
-                badge: 'Premium',
-                features: ['316L Stainless Steel', 'Extra heavy', '6-month warranty', 'Limited edition']
-            },
-            {
-                id: 12,
-                name: 'Warrior Pendant',
-                image: 'images/chains/chain4.jpg',
-                description: 'Iconic warrior symbol pendant on premium chain. Carry your battle cry.',
-                currentPrice: 2199,
-                originalPrice: 2899,
-                badge: 'New',
-                features: ['316L Stainless Steel', 'Warrior symbol', '6-month warranty', 'Handcrafted pendant']
-            }
-        ];
+        let chainProducts = [];
 
-        // Load products
-        function loadProducts() {
+        // Load products from API
+        async function loadProducts() {
             const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">Loading products...</div>';
 
-            chainProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}">
-                        <div class="product-badge">${product.badge}</div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-price">
-                            <span class="current-price">₹${product.currentPrice.toLocaleString()}</span>
-                            <span class="original-price">₹${product.originalPrice.toLocaleString()}</span>
+            try {
+                const response = await fetch('/api/products?category=chains&limit=50');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error('Failed to load products');
+                }
+
+                chainProducts = data.products || [];
+
+                if (chainProducts.length === 0) {
+                    grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">No chains available at the moment.</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+
+                chainProducts.forEach(product => {
+                    const badge = product.featured ? 'Featured' :
+                                 product.stock_quantity < 10 ? 'Low Stock' : 'Available';
+
+                    const features = [
+                        product.material || '316L Stainless Steel',
+                        'Non-tarnish finish',
+                        '6-month warranty',
+                        product.stock_quantity > 0 ? 'In Stock' : 'Pre-order'
+                    ];
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <div class="product-image">
+                            <img src="${product.image_url}" alt="${product.name}">
+                            <div class="product-badge">${badge}</div>
                         </div>
-                        <ul class="product-features">
-                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
-                        </ul>
-                        <div class="product-actions">
-                            <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
-                            <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-description">${product.description || 'Premium chain crafted with excellence.'}</p>
+                            <div class="product-price">
+                                <span class="current-price">₹${parseFloat(product.price).toLocaleString()}</span>
+                                ${product.compare_at_price ? `<span class="original-price">₹${parseFloat(product.compare_at_price).toLocaleString()}</span>` : ''}
+                            </div>
+                            <ul class="product-features">
+                                ${features.map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                            <div class="product-actions">
+                                <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
+                                <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                grid.appendChild(productCard);
-            });
+                    `;
+                    grid.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+                grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--rage-red);">Failed to load products. Please refresh the page.</div>';
+            }
         }
 
         // Add to cart function

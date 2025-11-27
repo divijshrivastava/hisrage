@@ -309,79 +309,70 @@
 
     <script>
         // Bracelet products data
-        const braceletProducts = [
-            {
-                id: 5,
-                name: 'Chain of Command Bracelet',
-                image: 'images/bracelets/bracelet1.jpg',
-                description: 'Heavy-duty steel chain bracelet that declares dominance. Built to last, designed to intimidate.',
-                currentPrice: 1899,
-                originalPrice: 2499,
-                badge: 'Featured',
-                features: ['316L Stainless Steel', 'Heavy chain links', '6-month warranty', 'Adjustable clasp']
-            },
-            {
-                id: 6,
-                name: 'Fury Leather Bracelet',
-                image: 'images/bracelets/bracelet2.jpg',
-                description: 'Premium leather combined with steel accents. Where raw meets refined.',
-                currentPrice: 1499,
-                originalPrice: 1899,
-                badge: 'Best Seller',
-                features: ['Genuine leather', 'Steel clasp', '6-month warranty', 'Handcrafted']
-            },
-            {
-                id: 7,
-                name: 'Beast Mode Bracelet',
-                image: 'images/bracelets/bracelet3.jpg',
-                description: 'Chunky steel links that embody primal power. Wear your rage on your wrist.',
-                currentPrice: 2199,
-                originalPrice: 2799,
-                badge: 'Premium',
-                features: ['316L Stainless Steel', 'Extra thick links', '6-month warranty', 'Limited edition']
-            },
-            {
-                id: 8,
-                name: 'Alpha Steel Band',
-                image: 'images/bracelets/bracelet4.jpg',
-                description: 'Sleek yet powerful steel band. For the alpha who leads without words.',
-                currentPrice: 1699,
-                originalPrice: 2199,
-                badge: 'New',
-                features: ['316L Stainless Steel', 'Minimalist design', '6-month warranty', 'Water resistant']
+        let braceletProducts = [];
+
+        // Load products from API
+        async function loadProducts() {
+            const grid = document.getElementById("productsGrid");
+            grid.innerHTML = "<div style=\"text-align: center; padding: 3rem; color: var(--text-secondary);\">Loading products...</div>";
+
+            try {
+                const response = await fetch("/api/products?category=bracelets&limit=50");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error("Failed to load products");
+                }
+
+                braceletProducts = data.products || [];
+
+                if (braceletProducts.length === 0) {
+                    grid.innerHTML = "<div style=\"text-align: center; padding: 3rem; color: var(--text-secondary);\">No bracelets available at the moment.</div>";
+                    return;
+                }
+
+                grid.innerHTML = "";
+
+                braceletProducts.forEach(product => {
+                    const badge = product.featured ? "Featured" :
+                                 product.stock_quantity < 10 ? "Low Stock" : "Available";
+
+                    const features = [
+                        product.material || "316L Stainless Steel",
+                        "Non-tarnish finish",
+                        "6-month warranty",
+                        product.stock_quantity > 0 ? "In Stock" : "Pre-order"
+                    ];
+
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <div class="product-image">
+                            <img src="${product.image_url}" alt="${product.name}">
+                            <div class="product-badge">${badge}</div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-description">${product.description || 'Premium bracelet crafted with excellence.'}</p>
+                            <div class="product-price">
+                                <span class="current-price">₹${parseFloat(product.price).toLocaleString()}</span>
+                                ${product.compare_at_price ? `<span class="original-price">₹${parseFloat(product.compare_at_price).toLocaleString()}</span>` : ''}
+                            </div>
+                            <ul class="product-features">
+                                ${features.map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                            <div class="product-actions">
+                                <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
+                                <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+                grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--rage-red);">Failed to load products. Please refresh the page.</div>';
             }
-        ];
-
-        // Load products
-        function loadProducts() {
-            const grid = document.getElementById('productsGrid');
-
-            braceletProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}">
-                        <div class="product-badge">${product.badge}</div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description}</p>
-                        <div class="product-price">
-                            <span class="current-price">₹${product.currentPrice.toLocaleString()}</span>
-                            <span class="original-price">₹${product.originalPrice.toLocaleString()}</span>
-                        </div>
-                        <ul class="product-features">
-                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
-                        </ul>
-                        <div class="product-actions">
-                            <button class="btn-add-cart" data-product-id="${product.id}" data-action="add-to-cart">Add to Cart</button>
-                            <button class="btn-quick-view" data-product-id="${product.id}" data-action="quick-view">View</button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(productCard);
-            });
         }
 
         // Add to cart function
