@@ -75,44 +75,29 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Session configuration with PostgreSQL store
-try {
-    const sessionStore = new pgSession({
-        pool: db.pool,
-        tableName: 'session',
-        createTableIfMissing: true,
-        errorLog: console.error
-    });
+const sessionStore = new pgSession({
+    pool: db.pool,
+    tableName: 'session',
+    createTableIfMissing: true,
+    errorLog: (err) => {
+        console.error('Session store error:', err);
+    }
+});
 
-    app.use(session({
-        store: sessionStore,
-        secret: process.env.SESSION_SECRET || 'hisrage-secret-key',
-        resave: false,
-        saveUninitialized: true, // Create session immediately for cart to work
-        cookie: {
-            secure: process.env.NODE_ENV === 'production',
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'lax' // Allow same-site requests
-        }
-    }));
+app.use(session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'hisrage-secret-key',
+    resave: false,
+    saveUninitialized: true, // Create session immediately for cart to work
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax' // Allow same-site requests
+    }
+}));
 
-    console.log('✅ PostgreSQL session store configured');
-} catch (error) {
-    console.error('❌ Failed to configure PostgreSQL session store:', error);
-    console.log('⚠️  Falling back to memory store');
-
-    app.use(session({
-        secret: process.env.SESSION_SECRET || 'hisrage-secret-key',
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-            secure: process.env.NODE_ENV === 'production',
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000,
-            sameSite: 'lax'
-        }
-    }));
-}
+console.log('✅ PostgreSQL session store configured');
 
 // Serve static files with correct MIME types
 app.use(express.static(path.join(__dirname), {

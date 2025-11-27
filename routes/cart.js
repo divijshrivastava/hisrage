@@ -2,41 +2,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/config');
 
-// Product data mapping (for when database is not available)
-const productDataMap = {
-    1: { name: 'Warrior Signet Ring', price: 1499, image_url: 'images/pexels-pixabay-259064.jpg' },
-    2: { name: 'Alpha Wolf Ring', price: 1299, image_url: 'images/pexels-pixabay-259064.jpg' },
-    3: { name: 'Rage Band', price: 899, image_url: 'images/pexels-pixabay-259064.jpg' },
-    4: { name: 'Chain of Command Bracelet', price: 1899, image_url: 'images/bracelets/bracelet1.jpg' },
-    5: { name: 'Chain of Command Bracelet', price: 1899, image_url: 'images/bracelets/bracelet1.jpg' },
-    6: { name: 'Fury Leather Bracelet', price: 1499, image_url: 'images/bracelets/bracelet2.jpg' },
-    7: { name: 'Beast Mode Bracelet', price: 2199, image_url: 'images/bracelets/bracelet3.jpg' },
-    8: { name: 'Alpha Steel Band', price: 1699, image_url: 'images/bracelets/bracelet4.jpg' },
-    9: { name: 'Dominance Chain', price: 2499, image_url: 'images/chains/chain1.jpg' },
-    10: { name: 'Rage Pendant Chain', price: 1799, image_url: 'images/chains/chain2.jpg' },
-    11: { name: 'Alpha Chain', price: 2999, image_url: 'images/chains/chain3.jpg' },
-    12: { name: 'Power Chain', price: 2299, image_url: 'images/chains/chain4.jpg' }
-};
-
-// Helper function to check if database is available
-async function isDbAvailable() {
-    try {
-        await db.query('SELECT 1');
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-// Helper function to get or create cart (session-based fallback)
+// Helper function to get or create cart
 async function getOrCreateCart(userId, sessionId) {
     console.log('getOrCreateCart called with userId:', userId, 'sessionId:', sessionId);
-    const dbAvailable = await isDbAvailable();
-
-    if (!dbAvailable) {
-        // Return a mock cart object for session-based storage
-        return { id: 'session-cart' };
-    }
 
     let cart;
 
@@ -67,21 +35,6 @@ async function getOrCreateCart(userId, sessionId) {
 // Get cart
 router.get('/', async (req, res) => {
     try {
-        const dbAvailable = await isDbAvailable();
-        
-        if (!dbAvailable) {
-            // Use session-based cart
-            const cartItems = req.session.cart || [];
-            const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-            
-            return res.json({
-                cart_id: 'session-cart',
-                items: cartItems,
-                item_count: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                subtotal: subtotal.toFixed(2)
-            });
-        }
-
         const userId = req.session.userId || null;
         const sessionId = req.session.id;
 
@@ -119,77 +72,21 @@ router.post('/add', async (req, res) => {
             return res.status(400).json({ error: 'Product ID is required' });
         }
 
-        const dbAvailable = await isDbAvailable();
-        let productData;
+        // Get product details from database
+        const product = await db.query(
+            'SELECT * FROM products WHERE id = $1 AND is_active = TRUE',
+            [product_id]
+        );
 
-        if (!dbAvailable) {
-            // Use product data map
-            productData = productDataMap[product_id];
-            if (!productData) {
-                return res.status(404).json({ error: 'Product not found' });
-            }
-        } else {
-            // Get product details from database
-            const product = await db.query(
-                'SELECT * FROM products WHERE id = $1 AND is_active = TRUE',
-                [product_id]
-            );
-
-            if (product.rows.length === 0) {
-                // Fallback to product data map if not in database
-                productData = productDataMap[product_id];
-                if (!productData) {
-                    return res.status(404).json({ error: 'Product not found' });
-                }
-                console.log('Using fallback product data for product', product_id);
-            } else {
-                productData = product.rows[0];
-
-                // Check stock
-                if (productData.stock_quantity < quantity) {
-                    return res.status(400).json({ error: 'Insufficient stock' });
-                }
-            }
+        if (product.rows.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
         }
 
-        if (!dbAvailable) {
-            // Use session-based cart
-            if (!req.session.cart) {
-                req.session.cart = [];
-            }
+        const productData = product.rows[0];
 
-            const existingItemIndex = req.session.cart.findIndex(item => item.product_id === product_id);
-
-            if (existingItemIndex >= 0) {
-                // Update quantity
-                req.session.cart[existingItemIndex].quantity += quantity;
-            } else {
-                // Add new item
-                req.session.cart.push({
-                    id: `item-${Date.now()}`,
-                    product_id: product_id,
-                    quantity: quantity,
-                    price: productData.price,
-                    name: productData.name,
-                    image_url: productData.image_url
-                });
-            }
-
-            // Explicitly save session
-            req.session.save((err) => {
-                if (err) {
-                    console.error('Session save error:', err);
-                    return res.status(500).json({ error: 'Failed to save cart' });
-                }
-
-                // Return updated cart count
-                const itemCount = req.session.cart.reduce((sum, item) => sum + item.quantity, 0);
-                return res.json({
-                    message: 'Item added to cart successfully',
-                    item_count: itemCount
-                });
-            });
-            return;
+        // Check stock
+        if (productData.stock_quantity < quantity) {
+            return res.status(400).json({ error: 'Insufficient stock' });
         }
 
         const userId = req.session.userId || null;
@@ -253,23 +150,6 @@ router.put('/update/:itemId', async (req, res) => {
             return res.status(400).json({ error: 'Quantity must be at least 1' });
         }
 
-        const dbAvailable = await isDbAvailable();
-
-        if (!dbAvailable) {
-            // Use session-based cart
-            if (!req.session.cart) {
-                return res.status(404).json({ error: 'Cart item not found' });
-            }
-
-            const itemIndex = req.session.cart.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) {
-                return res.status(404).json({ error: 'Cart item not found' });
-            }
-
-            req.session.cart[itemIndex].quantity = quantity;
-            return res.json({ message: 'Cart updated successfully' });
-        }
-
         // Get cart item with product details
         const item = await db.query(`
             SELECT ci.*, p.stock_quantity
@@ -302,23 +182,6 @@ router.put('/update/:itemId', async (req, res) => {
 router.delete('/remove/:itemId', async (req, res) => {
     try {
         const { itemId } = req.params;
-
-        const dbAvailable = await isDbAvailable();
-
-        if (!dbAvailable) {
-            // Use session-based cart
-            if (!req.session.cart) {
-                return res.status(404).json({ error: 'Cart item not found' });
-            }
-
-            const itemIndex = req.session.cart.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) {
-                return res.status(404).json({ error: 'Cart item not found' });
-            }
-
-            req.session.cart.splice(itemIndex, 1);
-            return res.json({ message: 'Item removed from cart' });
-        }
 
         await db.query('DELETE FROM cart_items WHERE id = $1', [itemId]);
 
